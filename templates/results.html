@@ -7,6 +7,9 @@
 </head>
 <body>
     <h1>Results</h1>
+    <p>Well done, {{ name }}!</p>
+    <p>Your score: {{ score }}</p>
+    <a href="{{ url_for('index') }}">Click to Play Again</a>
     <ul>
         {% for question, result in results %}
             <li>{{ question }}: {{ result }}</li>
