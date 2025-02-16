@@ -5,7 +5,7 @@
 from flask import Flask, render_template, request, redirect, url_for
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from models import Base, Question
+from models import Base, Question, User
 
 app = Flask(__name__)
 
@@ -23,15 +23,25 @@ def index():
 @app.route("/submit", methods=["POST"])
 def submit():
     '''Check the user's answers and display the results'''
+    name = request.form.get("name")
+    score = 0
     results = []
+
     for question in session.query(Question).all():
         question_id = question.id
         user_answer = request.form.get(f"{question_id}")
+
         if user_answer and question.correct_answer.lower() == user_answer.lower():
+            score += 1  # Increase score only for correct answers
             results.append((question.question, "Correct!"))
         else:
             results.append((question.question, "Incorrect!"))
-    return render_template("results.html", results=results) 
 
+    # Store the final attempt in the database **after** looping through questions
+    user = User(name=name, score=score)
+    session.add(user)
+    session.commit()
+
+    return render_template("results.html", name=name, score=score)
 if __name__ == "__main__":
     app.run(debug=True)
